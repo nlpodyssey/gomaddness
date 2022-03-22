@@ -1,0 +1,44 @@
+name: Go
+on: [ push, pull_request ]
+jobs:
+  test:
+    name: go test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+          check-latest: true
+      - name: Run tests and generate coverage report
+        run: go test -coverprofile cover.out -covermode atomic ./...
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          file: ./cover.out
+
+  vet:
+    name: go vet
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+          check-latest: true
+      - uses: actions/checkout@v3
+      - name: go vet
+        run: go vet ./...
+
+  gocyclo:
+    name: gocyclo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '1.18'
+          check-latest: true
+      - name: Install gocyclo
+        run: go install github.com/fzipp/gocyclo/cmd/gocyclo@latest
+      - uses: actions/checkout@v3
+      - name: gocyclo
+        run: gocyclo .
